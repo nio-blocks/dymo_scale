@@ -38,18 +38,22 @@ class DymoScale(GeneratorBlock):
         while not self.device:
             try:
                 self.device = usb.core.find(
-                    self.manufacturer_id, self.product_id)
+                    idVendor=self.manufacturer_id,
+                    idProduct=self.product_id)
+                if self.device is None:
+                    msg = 'Scale not found, trying again in {} seconds'
+                    self.logger.error(msg.format(self.reconnect_interval))
+                    sleep(self.reconnect_interval)
+                    continue
                 self.logger.debug('Device discovered')
                 self.device.reset()
                 self.logger.debug('Device reset')
                 interface = 0
-                if self.device.is_kernel_driver_attached(interface):
+                if self.device.is_kernel_driver_active(interface):
                     self.device.detach_kernel_driver(interface)
                     self.logger.debug('Detached kernel driver')
                 self.device.set_configuration()
                 self.logger.debug('Device Configured')
-                self.device.connect()
-                self.logger.debug('Device Connected!')
                 endpoint = self.device[interface][(0, 0)][0]
                 self._address = endpoint.bEndpointAddress
                 self._packet_size = endpoint.wMaxPacketSize
