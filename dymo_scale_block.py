@@ -19,6 +19,16 @@ class DymoScale(GeneratorBlock):
 
     def start(self):
         super().start()
+        spawn(self._connect)
+        spawn(self._reader)
+
+    def stop(self):
+        self.logger.debug('Stopping reader thread')
+        self._kill = True
+        super().stop()
+
+    def _connect(self):
+        self.logger.debug('Connection thread spawned')
         self.device = usb.core.find(self.manufacturer_id, self.product_id)
         self.logger.debug('Device discovered')
         self.device.reset()
@@ -34,12 +44,7 @@ class DymoScale(GeneratorBlock):
         endpoint = self.device[interface][(0, 0)][0]
         self._address = endpoint.bEndpointAddress
         self._packet_size = endpoint.wMaxPacketSize
-        spawn(self._reader)
-
-    def stop(self):
-        self.logger.debug('Stopping reader thread')
-        self._kill = True
-        super().stop()
+        self.logger.debug('Connection thread completed')
 
     def _reader(self):
         self.logger.debug('Reader thread spawned')
