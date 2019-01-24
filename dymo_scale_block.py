@@ -54,6 +54,7 @@ class DymoScale(GeneratorBlock):
         self.logger.debug('Reader thread completed')
 
     def _parse_weight(self, data):
+        # battery = data[0]
         state = data[1]
         if state == 5:  # scale value is negative
             sign = -1
