@@ -10,7 +10,7 @@ from ..dymo_scale_block import DymoScale
 
 class DummyDevice():
 
-    dummy_packet = array('B', [3, 4, 11, 255, 2, 0])
+    dummy_packet = array('B', [3, 4, 11, 255, 100, 1])
 
     reset = Mock()
     is_kernel_driver_active = Mock()
@@ -70,4 +70,4 @@ class TestDymoScale(NIOBlockTestCase):
         self.assert_num_signals_notified(1)
         self.assertDictEqual(
             self.last_notified[DEFAULT_TERMINAL][0].to_dict(),
-            {'units': 'oz', 'weight': 0.2})
+            {'units': 'oz', 'weight': 35.6})
