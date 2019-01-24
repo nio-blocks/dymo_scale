@@ -54,7 +54,7 @@ class TestDymoScale(NIOBlockTestCase):
         mock_usb_core.find.return_value = mock_device
         e = Event()
         blk = ReadEvent(e)
-        cfg = {'log_level': 'DEBUG'}
+        cfg = {}
         self.configure_block(blk, cfg)
         blk.start()
         e.wait(1)  # wait up to 1 second for signals from block
