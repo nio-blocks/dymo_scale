@@ -13,10 +13,9 @@ class DummyDevice():
     dummy_packet = array('B', [3, 4, 11, 255, 2, 0])
 
     reset = Mock()
-    is_kernel_driver_attached = Mock()
+    is_kernel_driver_active = Mock()
     detach_kernel_driver = Mock()
     set_configuration = Mock()
-    connect = Mock()
     read = Mock(return_value=dummy_packet)
 
     def __init__(self):
@@ -50,7 +49,7 @@ class TestDymoScale(NIOBlockTestCase):
     def test_read_from_scale(self, mock_usb_core):
         """Discover, connect to, and read from a scale."""
         mock_device = DummyDevice()
-        mock_device.is_kernel_driver_attached.return_value = True
+        mock_device.is_kernel_driver_active.return_value = True
         mock_usb_core.find.return_value = mock_device
         e = Event()
         blk = ReadEvent(e)
@@ -60,12 +59,12 @@ class TestDymoScale(NIOBlockTestCase):
         e.wait(1)  # wait up to 1 second for signals from block
         blk.stop()
         mock_usb_core.find.assert_called_once_with(
-            blk.manufacturer_id, blk.product_id)
+            idVendor=blk.manufacturer_id,
+            idProduct=blk.product_id)
         mock_device.reset.assert_called_once_with()
-        mock_device.is_kernel_driver_attached.assert_called_once_with(0)
+        mock_device.is_kernel_driver_active.assert_called_once_with(0)
         mock_device.detach_kernel_driver.assert_called_once_with(0)
         mock_device.set_configuration.assert_called_once_with()
-        mock_device.connect.assert_called_once_with()
         mock_device.read.assert_called_once_with(
             DummyEndpoint.bEndpointAddress, DummyEndpoint.wMaxPacketSize)
         self.assert_num_signals_notified(1)
