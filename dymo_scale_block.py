@@ -2,7 +2,7 @@ from nio.block.base import Block
 from nio.properties import VersionProperty
 
 
-class Example(Block):
+class DymoScale(Block):
 
     version = VersionProperty('0.1.0')
 

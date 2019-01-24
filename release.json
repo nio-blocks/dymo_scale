@@ -1,7 +1,7 @@
 {
-  "namespace/BlockName": {
+  "nio/Example": {
     "language": "Python",
-    "version": "0.0.1",
-    "reference": "github.com/<organization>/<repo>@v0.0.1"
+    "from_python": "example_bock.Example",
+    "url": "git://github.com/<organization>/<repo>[@<tag>]"
   }
 }
