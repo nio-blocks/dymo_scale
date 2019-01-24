@@ -11,6 +11,7 @@ from ..dymo_scale_block import DymoScale
 class DummyDevice():
 
     dummy_packet = array('B', [3, 4, 11, 255, 2, 0])
+
     reset = Mock()
     is_kernel_driver_attached = Mock()
     detach_kernel_driver = Mock()
@@ -31,16 +32,6 @@ class DummyEndpoint():
     wMaxPacketSize = 0x08
 
 
-# class DummyReader():
-    # def __init__(self):
-        # self._done = False
-
-    # def __call__(self, address, length):
-        # if self._done:
-            # return
-        # self._done = True
-        # return DummyDevice.dummy_packet
-
 @not_discoverable
 class ReadEvent(DymoScale):
 
@@ -50,6 +41,7 @@ class ReadEvent(DymoScale):
 
     def notify_signals(self, signals):
         super().notify_signals(signals)
+        self._kill = True  # set here to stop iteration during test
         self._event.set()
 
 class TestDymoScale(NIOBlockTestCase):
@@ -59,7 +51,6 @@ class TestDymoScale(NIOBlockTestCase):
         """When started discover and connect to a scale."""
         mock_device = DummyDevice()
         mock_device.is_kernel_driver_attached.return_value = True
-        # mock_device.read.side_effect = DummyReader()
         mock_usb_core.find.return_value = mock_device
         e = Event()
         blk = ReadEvent(e)
