@@ -47,8 +47,8 @@ class ReadEvent(DymoScale):
 class TestDymoScale(NIOBlockTestCase):
 
     @patch('usb.core')
-    def test_connection(self, mock_usb_core):
-        """When started discover and connect to a scale."""
+    def test_read_from_scale(self, mock_usb_core):
+        """Discover, connect to, and read from a scale."""
         mock_device = DummyDevice()
         mock_device.is_kernel_driver_attached.return_value = True
         mock_usb_core.find.return_value = mock_device
