@@ -1,3 +1,4 @@
+from struct import unpack
 from threading import current_thread
 from time import sleep
 import usb.core
@@ -108,5 +109,6 @@ class DymoScale(GeneratorBlock):
             factor = 1
         weight_hi = data[4]
         weight_lo = data[5]
-        weight = (weight_hi + weight_lo) / factor * sign
+        raw_weight = unpack('<H', bytes([weight_hi, weight_lo]))[0]
+        weight = raw_weight / factor * sign
         return units, weight
