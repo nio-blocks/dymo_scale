@@ -25,21 +25,18 @@ class DymoScale(GeneratorBlock):
 
         self._address = None
         self._packet_size = None
-        self._detached = False
 
     def start(self):
         super().start()
         spawn(self._connect)
 
     def stop(self):
-        if self._detached:
-            self.device.attach_kernel_driver(self.device_interface)
-            self.logger.debug('Reattached kernel driver')
         self._disconnect()
         super().stop()
 
     def _connect(self):
         self.logger.debug('Connecting to scale device...')
+        self._kill = False
         while not self.device and not self._kill:
             try:
                 self.device = usb.core.find(
@@ -66,7 +63,6 @@ class DymoScale(GeneratorBlock):
                 msg = 'Unable to connect to scale, trying again in {} seconds'
                 self.logger.exception(msg.format(self.reconnect_interval))
                 sleep(self.reconnect_interval)
-        self._kill = False
         spawn(self._reader)
 
     def _disconnect(self):

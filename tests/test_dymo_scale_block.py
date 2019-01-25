@@ -68,7 +68,6 @@ class TestDymoScale(NIOBlockTestCase):
         mock_device.set_configuration.assert_called_once_with()
         mock_device.read.assert_called_once_with(
             DummyEndpoint.bEndpointAddress, DummyEndpoint.wMaxPacketSize)
-        mock_device.attach_kernel_driver.assert_called_once_with(0)
         self.assert_num_signals_notified(1)
         self.assertDictEqual(
             self.last_notified[DEFAULT_TERMINAL][0].to_dict(),
