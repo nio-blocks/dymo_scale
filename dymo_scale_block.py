@@ -32,6 +32,7 @@ class DymoScale(GeneratorBlock):
 
     def stop(self):
         self._disconnect()
+        self._reader_thread.join()
         super().stop()
 
     def _connect(self):
@@ -60,7 +61,7 @@ class DymoScale(GeneratorBlock):
                 self._packet_size = endpoint.wMaxPacketSize
             except:
                 msg = 'Unable to connect to scale, trying again in {} seconds'
-                self.logger.error(msg.format(self.reconnect_interval))
+                self.logger.exception(msg.format(self.reconnect_interval))
                 sleep(self.reconnect_interval)
         self._kill = False
         self._reader_thread = spawn(self._reader)
@@ -92,18 +93,15 @@ class DymoScale(GeneratorBlock):
 
     def _parse_weight(self, data):
         # battery = data[0]
-        state = data[1]
-        if state == 5:  # scale value is negative
+        if data[1] == 5:  # scale value is negative
             sign = -1
         else:
             sign = 1
-        units = data[2]
-        if units == 2:
+        if data[2] == 2:
             units = 'g'
         else:
             units = 'oz'
-        factor = data[3]
-        if factor == 255:  # values are multiplied by 10
+        if data[3] == 255:  # values are multiplied by 10
             factor = 10
         else:
             factor = 1
