@@ -1,11 +1,11 @@
 {
-  "nio/Example": {
-    "description": "A short summary of the block.",
+  "nio/DymoScale": {
+    "description": "Stream weight data from DYMO brand scales.",
     "categories": [
-      ""
+      "Hardware"
     ],
-    "tags": "",
-    "from_readme": "docs/example_block.md",
-    "from_python": "example_block.Example"
+    "tags": "weigh scale usb",
+    "from_readme": "docs/dymo_scale_block.md",
+    "from_python": "dymo_scale_block.DymoScale"
   }
 }

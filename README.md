@@ -1,18 +1,11 @@
-Example
+dymo_scale
 =======
 
 Blocks in this Collection
 -------------------------
-[Example](docs/example_block.md)
-
-Installation
-------------
-Any additional information or steps required for installation can go here.
-
-Notes
------
-Notes for developers can go here.
+[DymoScale](docs/dymo_scale_block.md)
 
 Dependencies
 ------------
-None, or list all packages that need to be installed. This should match `requirements.txt`, plus any packages that cannot be installed using `pip`.
+libusb 0.1 or 1.0
+Windows: [libisb-win32](http://libusb-win32.sourceforge.net/)

@@ -1,15 +1,20 @@
-Example
+DymoScale
 =======
-What does this block do?
+Stream weight values from a DYMO M25-US USB scale.
 
 Properties
 ----------
-None, or describe any configurable properties of the block.
+None
 
 Example
 -------
-Provide a helpful example of input and output signals, and the effects of the various properties and commands available.
+```
+{
+  "units": <"oz"|"g">,
+  "weight": <float>
+}
+```
 
 Commands
 --------
-None, or describe any commands that are available.
+None

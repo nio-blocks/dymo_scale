@@ -1,7 +1,7 @@
 {
-  "nio/Example": {
+  "nio/DymoScale": {
     "language": "Python",
-    "from_python": "example_bock.Example",
-    "url": "git://github.com/<organization>/<repo>[@<tag>]"
+    "from_python": "dymo_scale_bock.DymoScale",
+    "url": "git://github.com/nio-blocks/dymo_scale.git"
   }
 }
