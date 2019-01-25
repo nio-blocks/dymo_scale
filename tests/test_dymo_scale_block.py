@@ -14,6 +14,7 @@ class DummyDevice():
 
     reset = Mock()
     is_kernel_driver_active = Mock()
+    attach_kernel_driver = Mock()
     detach_kernel_driver = Mock()
     set_configuration = Mock()
     read = Mock(return_value=dummy_packet)
@@ -67,6 +68,7 @@ class TestDymoScale(NIOBlockTestCase):
         mock_device.set_configuration.assert_called_once_with()
         mock_device.read.assert_called_once_with(
             DummyEndpoint.bEndpointAddress, DummyEndpoint.wMaxPacketSize)
+        mock_device.attach_kernel_driver.assert_called_once_with(0)
         self.assert_num_signals_notified(1)
         self.assertDictEqual(
             self.last_notified[DEFAULT_TERMINAL][0].to_dict(),

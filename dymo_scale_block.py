@@ -16,28 +16,31 @@ class DymoScale(GeneratorBlock):
 
     manufacturer_id = 0x0922
     product_id = 0x8003
+    device_interface = 0
 
     def __init__(self):
         super().__init__()
         self.device = None
-        self._reader_thread = None
         self._kill = False
 
         self._address = None
         self._packet_size = None
+        self._detached = False
 
     def start(self):
         super().start()
         spawn(self._connect)
 
     def stop(self):
+        if self._detached:
+            self.device.attach_kernel_driver(self.device_interface)
+            self.logger.debug('Reattached kernel driver')
         self._disconnect()
-        self._reader_thread.join()
         super().stop()
 
     def _connect(self):
         self.logger.debug('Connecting to scale device...')
-        while not self.device:
+        while not self.device and not self._kill:
             try:
                 self.device = usb.core.find(
                     idVendor=self.manufacturer_id,
@@ -50,13 +53,13 @@ class DymoScale(GeneratorBlock):
                 self.logger.debug('Device discovered')
                 self.device.reset()
                 self.logger.debug('Device reset')
-                interface = 0
-                if self.device.is_kernel_driver_active(interface):
-                    self.device.detach_kernel_driver(interface)
+                if self.device.is_kernel_driver_active(self.device_interface):
+                    self.device.detach_kernel_driver(self.device_interface)
+                    self._detached = True
                     self.logger.debug('Detached kernel driver')
                 self.device.set_configuration()
                 self.logger.debug('Device Configured')
-                endpoint = self.device[interface][(0, 0)][0]
+                endpoint = self.device[self.device_interface][(0, 0)][0]
                 self._address = endpoint.bEndpointAddress
                 self._packet_size = endpoint.wMaxPacketSize
             except:
@@ -64,7 +67,7 @@ class DymoScale(GeneratorBlock):
                 self.logger.exception(msg.format(self.reconnect_interval))
                 sleep(self.reconnect_interval)
         self._kill = False
-        self._reader_thread = spawn(self._reader)
+        spawn(self._reader)
 
     def _disconnect(self):
         self.logger.debug('Halting read operations')
