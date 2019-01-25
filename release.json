@@ -1,7 +1,7 @@
 {
   "nio/DymoScale": {
     "language": "Python",
-    "from_python": "dymo_scale_bock.DymoScale",
+    "from_python": "dymo_scale_block.DymoScale",
     "url": "git://github.com/nio-blocks/dymo_scale.git"
   }
 }
