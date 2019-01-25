@@ -8,4 +8,3 @@ Blocks in this Collection
 Dependencies
 ------------
 libusb 0.1 or 1.0
-Windows: [libisb-win32](http://libusb-win32.sourceforge.net/)
