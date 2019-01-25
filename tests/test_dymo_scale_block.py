@@ -10,7 +10,7 @@ from ..dymo_scale_block import DymoScale
 
 class DummyDevice():
 
-    dummy_packet = array('B', [3, 4, 11, 255, 100, 1])
+    dummy_packet = array('B', [3, 4, 11, 255, 100, 1])  # 35.6 oz
 
     reset = Mock()
     is_kernel_driver_active = Mock()
