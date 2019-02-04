@@ -70,12 +70,12 @@ class DymoScale(GeneratorBlock):
                 self._address = endpoint.bEndpointAddress
                 self._packet_size = endpoint.wMaxPacketSize
             except:
+                self.device = None
                 if not self.status.is_set(RunnerStatus.warning):
                     self.set_status('warning')
                 msg = 'Unable to connect to scale, trying again in {} seconds'
                 self.logger.exception(msg.format(self.reconnect_interval()))
                 sleep(self.reconnect_interval())
-                continue
         self.set_status('ok')
         spawn(self._reader)
 
