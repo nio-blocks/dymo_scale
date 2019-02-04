@@ -62,6 +62,8 @@ class DymoScale(GeneratorBlock):
                     self.device.detach_kernel_driver(self.device_interface)
                     self._detached = True
                     self.logger.debug('Detached kernel driver')
+                else:
+                    self.logger.debug('No active kernel driver found')
                 self.device.set_configuration()
                 self.logger.debug('Device Configured')
                 endpoint = self.device[self.device_interface][(0, 0)][0]
@@ -73,6 +75,7 @@ class DymoScale(GeneratorBlock):
                 msg = 'Unable to connect to scale, trying again in {} seconds'
                 self.logger.exception(msg.format(self.reconnect_interval()))
                 sleep(self.reconnect_interval())
+                continue
         self.set_status('ok')
         spawn(self._reader)
 
