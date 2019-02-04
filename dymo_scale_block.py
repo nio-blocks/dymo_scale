@@ -4,6 +4,7 @@ from time import sleep
 import usb.core
 from nio import GeneratorBlock, Signal
 from nio.properties import VersionProperty
+from nio.util.runner import RunnerStatus
 from nio.util.threading import spawn
 
 
@@ -43,6 +44,8 @@ class DymoScale(GeneratorBlock):
                     idVendor=self.manufacturer_id,
                     idProduct=self.product_id)
                 if self.device is None:
+                    if not self.status.is_set(RunnerStatus.warning):
+                        self.set_status('warning')
                     msg = 'Scale not found, trying again in {} seconds'
                     self.logger.error(msg.format(self.reconnect_interval))
                     sleep(self.reconnect_interval)
@@ -60,9 +63,12 @@ class DymoScale(GeneratorBlock):
                 self._address = endpoint.bEndpointAddress
                 self._packet_size = endpoint.wMaxPacketSize
             except:
+                if not self.status.is_set(RunnerStatus.warning):
+                    self.set_status('warning')
                 msg = 'Unable to connect to scale, trying again in {} seconds'
                 self.logger.exception(msg.format(self.reconnect_interval))
                 sleep(self.reconnect_interval)
+        self.set_status('ok')
         spawn(self._reader)
 
     def _disconnect(self):
@@ -77,6 +83,8 @@ class DymoScale(GeneratorBlock):
             try:
                 data = self.device.read(self._address, self._packet_size)
             except:
+                if not self.status.is_set(RunnerStatus.warning):
+                    self.set_status('warning')
                 self.logger.exception('Read operation from scale failed')
                 self._disconnect()
                 self._connect()
