@@ -10,7 +10,7 @@ from nio.util.threading import spawn
 
 class DymoScale(GeneratorBlock):
 
-    read_interval = FloatProperty(title='Reconnect Interval', default=1.0)
+    read_interval = FloatProperty(title='Read Interval', default=1.0)
     reconnect_interval = FloatProperty(title='Reconnect Interval', default=5.0)
     version = VersionProperty('0.2.0')
 
