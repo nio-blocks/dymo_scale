@@ -3,17 +3,16 @@ from threading import current_thread
 from time import sleep
 import usb.core
 from nio import GeneratorBlock, Signal
-from nio.properties import VersionProperty
+from nio.properties import FloatProperty, VersionProperty
 from nio.util.runner import RunnerStatus
 from nio.util.threading import spawn
 
 
 class DymoScale(GeneratorBlock):
 
-    version = VersionProperty('0.1.0')
-
-    read_interval = 0.5  # seconds between reads
-    reconnect_interval = 10
+    read_interval = FloatProperty(title='Reconnect Interval', default=1.0)
+    reconnect_interval = FloatProperty(title='Reconnect Interval', default=5.0)
+    version = VersionProperty('0.2.0')
 
     manufacturer_id = 0x0922
     product_id = 0x8003
@@ -47,8 +46,8 @@ class DymoScale(GeneratorBlock):
                     if not self.status.is_set(RunnerStatus.warning):
                         self.set_status('warning')
                     msg = 'Scale not found, trying again in {} seconds'
-                    self.logger.error(msg.format(self.reconnect_interval))
-                    sleep(self.reconnect_interval)
+                    self.logger.error(msg.format(self.reconnect_interval()))
+                    sleep(self.reconnect_interval())
                     continue
                 self.logger.debug('Device discovered')
                 self.device.reset()
@@ -66,8 +65,8 @@ class DymoScale(GeneratorBlock):
                 if not self.status.is_set(RunnerStatus.warning):
                     self.set_status('warning')
                 msg = 'Unable to connect to scale, trying again in {} seconds'
-                self.logger.exception(msg.format(self.reconnect_interval))
-                sleep(self.reconnect_interval)
+                self.logger.exception(msg.format(self.reconnect_interval()))
+                sleep(self.reconnect_interval())
         self.set_status('ok')
         spawn(self._reader)
 
@@ -95,7 +94,7 @@ class DymoScale(GeneratorBlock):
                 'weight': weight,
             }
             self.notify_signals([Signal(signal_dict)])
-            sleep(self.read_interval)
+            sleep(self.read_interval())
         self.logger.debug('Reader thread {} completed'.format(thread_id))
 
     def _parse_weight(self, data):
