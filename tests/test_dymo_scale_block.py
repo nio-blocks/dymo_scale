@@ -139,7 +139,6 @@ class TestDymoScale(NIOBlockTestCase):
 
         # first attempt to read works and a signal notified
         self.assertTrue(notify_event.wait(1))
-        # self.assert_num_signals_notified(1)
         self.assertDictEqual(
             self.last_notified[DEFAULT_TERMINAL][-1].to_dict(),
             {'weight': 35.6, 'units': 'oz'})
