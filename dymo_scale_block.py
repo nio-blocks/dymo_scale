@@ -45,10 +45,14 @@ class DymoScale(GeneratorBlock):
                     idVendor=self.manufacturer_id,
                     idProduct=self.product_id)
                 if self.device is None:
+                    msg = 'Scale not found, trying again in {} seconds'
                     if not self.status.is_set(RunnerStatus.warning):
                         self.set_status('warning')
-                    msg = 'Scale not found, trying again in {} seconds'
-                    self.logger.error(msg.format(self.reconnect_interval()))
+                        self.logger.error(
+                            msg.format(self.reconnect_interval()))
+                    else:
+                        self.logger.warning(
+                            msg.format(self.reconnect_interval()))
                     sleep(self.reconnect_interval())
                     continue
                 self.logger.debug('Device discovered')
