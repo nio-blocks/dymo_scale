@@ -3,16 +3,18 @@ from threading import current_thread
 from time import sleep
 import usb.core
 from nio import GeneratorBlock, Signal
-from nio.properties import VersionProperty
+from nio.properties import FloatProperty, VersionProperty
+from nio.util.runner import RunnerStatus
 from nio.util.threading import spawn
 
 
 class DymoScale(GeneratorBlock):
 
-    version = VersionProperty('0.1.0')
-
-    read_interval = 0.5  # seconds between reads
-    reconnect_interval = 10
+    read_interval = FloatProperty(
+        title='Read Interval', default=1.0, advanced=True)
+    reconnect_interval = FloatProperty(
+        title='Reconnect Interval', default=5.0, advanced=True)
+    version = VersionProperty('0.2.0')
 
     manufacturer_id = 0x0922
     product_id = 0x8003
@@ -44,8 +46,14 @@ class DymoScale(GeneratorBlock):
                     idProduct=self.product_id)
                 if self.device is None:
                     msg = 'Scale not found, trying again in {} seconds'
-                    self.logger.error(msg.format(self.reconnect_interval))
-                    sleep(self.reconnect_interval)
+                    if not self.status.is_set(RunnerStatus.warning):
+                        self.set_status('warning')
+                        self.logger.error(
+                            msg.format(self.reconnect_interval()))
+                    else:
+                        self.logger.warning(
+                            msg.format(self.reconnect_interval()))
+                    sleep(self.reconnect_interval())
                     continue
                 self.logger.debug('Device discovered')
                 self.device.reset()
@@ -54,15 +62,21 @@ class DymoScale(GeneratorBlock):
                     self.device.detach_kernel_driver(self.device_interface)
                     self._detached = True
                     self.logger.debug('Detached kernel driver')
+                else:
+                    self.logger.debug('No active kernel driver found')
                 self.device.set_configuration()
                 self.logger.debug('Device Configured')
                 endpoint = self.device[self.device_interface][(0, 0)][0]
                 self._address = endpoint.bEndpointAddress
                 self._packet_size = endpoint.wMaxPacketSize
             except:
+                self.device = None
+                if not self.status.is_set(RunnerStatus.warning):
+                    self.set_status('warning')
                 msg = 'Unable to connect to scale, trying again in {} seconds'
-                self.logger.exception(msg.format(self.reconnect_interval))
-                sleep(self.reconnect_interval)
+                self.logger.exception(msg.format(self.reconnect_interval()))
+                sleep(self.reconnect_interval())
+        self.set_status('ok')
         spawn(self._reader)
 
     def _disconnect(self):
@@ -77,6 +91,8 @@ class DymoScale(GeneratorBlock):
             try:
                 data = self.device.read(self._address, self._packet_size)
             except:
+                if not self.status.is_set(RunnerStatus.warning):
+                    self.set_status('warning')
                 self.logger.exception('Read operation from scale failed')
                 self._disconnect()
                 self._connect()
@@ -87,7 +103,7 @@ class DymoScale(GeneratorBlock):
                 'weight': weight,
             }
             self.notify_signals([Signal(signal_dict)])
-            sleep(self.read_interval)
+            sleep(self.read_interval())
         self.logger.debug('Reader thread {} completed'.format(thread_id))
 
     def _parse_weight(self, data):
