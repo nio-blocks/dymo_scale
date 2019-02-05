@@ -154,3 +154,41 @@ class TestDymoScale(NIOBlockTestCase):
         # read operations resume and we get another signal
         self.assertTrue(notify_event.wait(1))
         blk.stop()
+
+    @patch('usb.core')
+    @patch('{}.sleep'.format(DymoScale.__module__))
+    def test_reconnect_interval(self, mock_sleep, mock_usb_core):
+        """Wait for the configured interval between connection attempts."""
+        test_interval = 3.14
+        mock_device = DummyDevice()
+        mock_usb_core.find.side_effect = [None, mock_device]
+        ok_event = Event()
+        blk = ScaleEvents(ok_event=ok_event)
+        cfg = {
+            'reconnect_interval': test_interval,
+        }
+        self.configure_block(blk, cfg)
+        blk.start()
+        # failed to connect, check retry interval
+        self.assertTrue(ok_event.wait(1))
+        self.assertEqual(mock_sleep.call_count, 1)
+        self.assertEqual(
+            mock_sleep.call_args_list[0][0], (test_interval,))
+
+    @patch('usb.core')
+    @patch('{}.sleep'.format(DymoScale.__module__))
+    def test_read_interval(self, mock_sleep, mock_usb_core):
+        """Wait for the configured interval between read operations."""
+        test_interval = 3.14
+        mock_device = DummyDevice()
+        mock_usb_core.find.return_value = mock_device
+        notify_event = Event()
+        blk = ScaleEvents(notify_event=notify_event)
+        cfg = {
+            'read_interval': test_interval,
+        }
+        self.configure_block(blk, cfg)
+        blk.start()
+        self.assertTrue(notify_event.wait(1))
+        self.assertEqual(
+            mock_sleep.call_args_list[-1][0], (test_interval,))
