@@ -2,6 +2,7 @@ from struct import unpack
 from threading import current_thread
 from time import sleep
 import usb.core
+import usb.util
 from nio import GeneratorBlock, Signal
 from nio.properties import FloatProperty, VersionProperty
 from nio.util.runner import RunnerStatus
@@ -24,6 +25,7 @@ class DymoScale(GeneratorBlock):
         super().__init__()
         self.device = None
         self._kill = False
+        self._thread = None
 
         self._address = None
         self._packet_size = None
@@ -77,11 +79,13 @@ class DymoScale(GeneratorBlock):
                 self.logger.exception(msg.format(self.reconnect_interval()))
                 sleep(self.reconnect_interval())
         self.set_status('ok')
-        spawn(self._reader)
+        self._thread = spawn(self._reader)
 
     def _disconnect(self):
         self.logger.debug('Halting read operations')
         self._kill = True
+        #self._thread.join()
+        usb.util.dispose_resources(self.device)
         self.device = None
 
     def _reader(self):
@@ -95,6 +99,7 @@ class DymoScale(GeneratorBlock):
                     self.set_status('warning')
                 self.logger.exception('Read operation from scale failed')
                 self._disconnect()
+                sleep(self.reconnect_interval())
                 self._connect()
                 break
             units, weight = self._parse_weight(data)
